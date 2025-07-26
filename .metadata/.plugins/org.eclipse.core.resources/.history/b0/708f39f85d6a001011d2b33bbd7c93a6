@@ -1,0 +1,119 @@
+package com.oracle.kyc.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.oracle.kyc.dao.KycDAO;
+import com.oracle.kyc.dto.AccountRequestDTO;
+import com.oracle.kyc.dto.AccountResponseDTO;
+import com.oracle.kyc.dto.CustomerResponseDTO;
+import com.oracle.kyc.dto.KycDTO;
+import com.oracle.kyc.model.Kyc;
+import com.oracle.kyc.proxy.AccountServiceProxy;
+import com.oracle.kyc.proxy.CustomerServiceProxy;
+import com.oracle.kyc.producer.EmailProducer;
+import com.oracle.kyc.request.EmailRequest;
+
+@Service
+public class KycServiceImpl implements KycService {
+
+    @Autowired
+    private KycDAO kycDAO;
+
+    @Autowired
+    private CustomerServiceProxy customerServiceProxy;
+
+    @Autowired
+    private EmailProducer emailProducer;
+
+    @Autowired
+    private AccountServiceProxy accountServiceProxy;  // ✅ Newly added
+
+    @Override
+    public String save(KycDTO kycDTO) {
+        Kyc kyc = new Kyc();
+        kyc.setCustomerId(kycDTO.getCustomerId());
+        kyc.setPan(kycDTO.getPan());
+        kyc.setAadhaar(kycDTO.getAadhaar());
+        kyc.setAddressProofType(kycDTO.getAddressProofType());
+        kyc.setDocumentPath(kycDTO.getDocumentPath());
+        kyc.setKycStatus("PENDING");
+        kycDAO.save(kyc);
+        return "KYC Data Saved Successfully";
+    }
+
+    @Override
+    public List<KycDTO> getAllKyc() {
+        return kycDAO.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public String reviewKyc(Long kycId, String status, String remark) {
+        Kyc kyc = kycDAO.findById(kycId).orElseThrow(() -> new RuntimeException("KYC not found"));
+        kyc.setKycStatus(status);
+        kyc.setRemark(remark);
+        kycDAO.save(kyc);
+
+        Long customerId = kyc.getCustomerId();
+        CustomerResponseDTO customer = customerServiceProxy.getCustomerById(customerId);
+
+        if ("REJECTED".equalsIgnoreCase(status)) {
+            EmailRequest emailRequest = new EmailRequest(
+                customer.getEmail(),
+                "KYC Rejection Notice for Customer ID: " + customerId,
+                "Dear Customer,\n\nYour KYC has been rejected for the following reason:\n\n" + remark +
+                "\n\nPlease correct the issue and re-submit.\n\nThanks,\nBank Admin"
+            );
+            emailProducer.sendEmail(emailRequest);
+        } else if ("VERIFIED".equalsIgnoreCase(status)) {
+            try {
+                // ✅ Call account microservice
+                AccountRequestDTO accountRequest = new AccountRequestDTO(customerId);
+                AccountResponseDTO response = accountServiceProxy.createAccount(accountRequest);
+
+                // ✅ Send account success email
+                EmailRequest successEmail = new EmailRequest(
+                    customer.getEmail(),
+                    "Account Created Successfully",
+                    "Dear Customer,\n\nYour account has been successfully created.\n\nAccount Number: "
+                    + response.getAccountNumber() + "\n\nThank you for banking with us.\n\nRegards,\nBank Team"
+                );
+                emailProducer.sendEmail(successEmail);
+
+            } catch (Exception e) {
+                // ✅ Send failure email if account creation fails
+                EmailRequest failureEmail = new EmailRequest(
+                    customer.getEmail(),
+                    "Account Creation Failed",
+                    "Dear Customer,\n\nWe verified your KYC but encountered an error while creating your account.\n\n"
+                    + "Error: " + e.getMessage() + "\n\nPlease contact support.\n\nRegards,\nBank Team"
+                );
+                emailProducer.sendEmail(failureEmail);
+            }
+        }
+
+        return "KYC Status Updated Successfully";
+    }
+
+    @Override
+    public KycDTO getKycByCustomerId(Long customerId) {
+        Kyc kyc = kycDAO.findByCustomerId(customerId);
+        return convertToDTO(kyc);
+    }
+
+    private KycDTO convertToDTO(Kyc kyc) {
+        KycDTO dto = new KycDTO();
+        dto.setKycId(kyc.getKycId());
+        dto.setCustomerId(kyc.getCustomerId());
+        dto.setPan(kyc.getPan());
+        dto.setAadhaar(kyc.getAadhaar());
+        dto.setAddressProofType(kyc.getAddressProofType());
+        dto.setDocumentPath(kyc.getDocumentPath());
+        dto.setKycStatus(kyc.getKycStatus());
+        dto.setRemark(kyc.getRemark());
+        return dto;
+    }
+}
