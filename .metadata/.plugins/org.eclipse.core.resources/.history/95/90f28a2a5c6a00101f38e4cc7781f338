@@ -1,0 +1,35 @@
+package com.oracle.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.oracle.dao.CustomerDao;
+import com.oracle.exception.EmailAlreadyExistsException;
+import com.oracle.model.Customer;
+
+@Service
+public class CustomerServiceImpl implements CustomerService {
+	
+	@Autowired
+	private CustomerDao customerDao;
+	
+	@Override
+	public Customer registerCustomer(Customer customer) {
+		Customer existingCustomer = customerDao.findByEmail(customer.getEmail());
+
+	    if (existingCustomer != null) {
+	        throw new EmailAlreadyExistsException("Customer with email " + customer.getEmail() + " already exists.");
+	    }
+		return customerDao.save(customer);
+	}
+	
+	@Override
+	public Customer loginCustomer(String email, String password) {
+	    Customer customer = customerDao.findByEmail(email);
+	    if (customer != null) {
+	        return customer;
+	    }
+	    return null;
+	}
+
+}

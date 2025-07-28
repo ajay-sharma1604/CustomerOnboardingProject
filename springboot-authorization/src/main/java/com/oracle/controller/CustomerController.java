@@ -1,0 +1,43 @@
+package com.oracle.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.oracle.dto.LoginDTO;
+import com.oracle.exception.EmailAlreadyExistsException;
+import com.oracle.model.Customer;
+import com.oracle.service.CustomerService;
+
+@RestController
+@RequestMapping("/customer")
+public class CustomerController {
+	@Autowired
+	private CustomerService customerService;
+	
+	@PostMapping("/register")
+	public ResponseEntity<?> registerCustomer(@RequestBody Customer customer) {
+	    try {
+	        Customer saved = customerService.registerCustomer(customer);
+	        return ResponseEntity.ok(saved);
+	    } catch (EmailAlreadyExistsException e) {
+	        return ResponseEntity.badRequest().body(e.getMessage());
+	    } catch (Exception e) {
+	        return ResponseEntity.internalServerError().body("Something went wrong: " + e.getMessage());
+	    }
+	}
+	@PostMapping("/login")
+	public ResponseEntity<String> loginCustomer(@RequestBody LoginDTO loginDetails) {
+	    Customer customer = customerService.loginCustomer(loginDetails.getEmail(), loginDetails.getPassword());
+
+	    if (customer != null) {
+	        return ResponseEntity.ok("Customer login successful");
+	    } else {
+	        return ResponseEntity.status(401).body("Invalid email or password");
+	    }
+	}
+
+}

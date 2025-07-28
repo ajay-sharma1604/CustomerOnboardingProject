@@ -1,0 +1,5 @@
+package com.oracle.dao;
+
+public class CustomerDaoImpl implements CustomerDao{
+	
+}
