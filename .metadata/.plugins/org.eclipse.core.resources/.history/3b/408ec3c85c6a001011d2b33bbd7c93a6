@@ -1,0 +1,5 @@
+package com.oracle.kyc.dto;
+
+public class AccountRequestDTO {
+
+}

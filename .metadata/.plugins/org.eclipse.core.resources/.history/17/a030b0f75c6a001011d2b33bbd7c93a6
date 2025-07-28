@@ -1,0 +1,5 @@
+package com.oracle.kyc.proxy;
+
+public class AccountServiceProxy {
+
+}
