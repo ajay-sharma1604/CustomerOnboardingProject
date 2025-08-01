@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename package &apos;com.oracle.util&apos; to &apos;com.oracle.security&apos;&#x0D;&#x0A;- Original project: &apos;springboot-authorization&apos;&#x0D;&#x0A;- Original element: &apos;springboot-authorization/src/main/java/com.oracle.util&apos;&#x0D;&#x0A;- Renamed element: &apos;springboot-authorization/src/main/java/com.oracle.security&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename package &apos;com.oracle.util&apos;" flags="589830" hierarchical="false" id="org.eclipse.jdt.ui.rename.package" input="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.oracle.util" name="com.oracle.security" qualified="false" references="true" stamp="1754024297770" textual="false" version="1.0"/>
+</session>

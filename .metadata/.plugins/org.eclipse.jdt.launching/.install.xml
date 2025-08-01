@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <dirs>
-<<<<<<< HEAD
     <entry loc="C:\Program Files\Java\jdk-17" stamp="1750935576403"/>
     <entry loc="C:\Users\Akshata Site\.p2\pool\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.7.v20250502-0916\jre" stamp="1751225614464"/>
     <entry loc="C:\Program Files\Java\jdk1.8.0_202" stamp="1751865328750"/>
     <entry loc="C:\Program Files\Java\jre1.8.0_451" stamp="1752483743306"/>
     <entry loc="C:\Program Files\Java\jdk-21" stamp="1751226653305"/>
     <entry loc="C:\Users\Akshata Site\.p2\pool\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.7.v20250502-0916" stamp="1751225614480"/>
-=======
-    <entry loc="C:\eclipse\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.5.v20241023-1957\jre" stamp="1751015571037"/>
-    <entry loc="C:\eclipse\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.5.v20241023-1957" stamp="1751015558826"/>
-    <entry loc="C:\Program Files\Java\jdk-21" stamp="1751015286527"/>
->>>>>>> 1a3a2c657c8571d6948d55c25168d1a8f8b1d4bb
 </dirs>

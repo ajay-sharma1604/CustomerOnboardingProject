@@ -1,0 +1,47 @@
+package com.oracle.security;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+public class JwtUtil {
+
+    private String secretKey = "mySecretKey"; // use strong secret in real app
+    private long expiration = 1000 * 60 * 60; // 1 hour
+
+    // Generate token
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .compact();
+    }
+
+    // Extract username from token
+    public String extractUsername(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // Validate token
+    public boolean validateToken(String token, String username) {
+        return (username.equals(extractUsername(token)) && !isTokenExpired(token));
+    }
+
+    private boolean isTokenExpired(String token) {
+        Date expirationDate = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+        return expirationDate.before(new Date());
+    }
+}

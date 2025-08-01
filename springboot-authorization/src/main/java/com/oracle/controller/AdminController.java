@@ -4,33 +4,45 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.oracle.dto.LoginDTO;
 import com.oracle.model.Admin;
+import com.oracle.security.JwtUtil;
 import com.oracle.service.AdminService;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
-	@Autowired
-	private AdminService adminService;
-	
-	@PostMapping("/register")
-	public ResponseEntity<Admin> registerAdmin(@Valid @RequestBody Admin admin){
-		Admin savedAdmin = adminService.registerAdmin(admin);
-		return ResponseEntity.ok(savedAdmin);
-	}
-	@PostMapping("/login")
-	public ResponseEntity<String> loginAdmin(@Valid @RequestBody LoginDTO loginDetails) {
+
+    @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    // Inside AdminController
+    @GetMapping("/dashboard")
+    public ResponseEntity<String> adminDashboard() {
+        return ResponseEntity.ok("Welcome to Admin Dashboard! You are authenticated.");
+    }
+
+    
+    @PostMapping("/register")
+    public ResponseEntity<Admin> registerAdmin(@Valid @RequestBody Admin admin) {
+        Admin savedAdmin = adminService.registerAdmin(admin);
+        return ResponseEntity.ok(savedAdmin);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginAdmin(@Valid @RequestBody LoginDTO loginDetails) {
         Admin admin = adminService.loginAdmin(loginDetails.getEmail(), loginDetails.getPassword());
 
         if (admin != null) {
-            return ResponseEntity.ok("Admin login successful");
-        } else {
+            String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole());
+            return ResponseEntity.ok("Admin login successful. Token: " + token);
+        }
+        else {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
     }

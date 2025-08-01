@@ -9,11 +9,10 @@ import javax.validation.constraints.Size;
 @Table(name = "admins")
 public class Admin {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "admin_seq_gen")
-	@SequenceGenerator(name = "admin_seq_gen", sequenceName = "ADMIN_SEQ", allocationSize = 1)
-	private Long adminId;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "admin_seq_gen")
+    @SequenceGenerator(name = "admin_seq_gen", sequenceName = "ADMIN_SEQ", allocationSize = 1)
+    private Long adminId;
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, message = "Name should have at least 2 characters")
@@ -28,13 +27,19 @@ public class Admin {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
+    @NotBlank(message = "Role is required")
+    @Column(name = "user_role", nullable = false)
+    private String role = "ADMIN";  // default
+
+
     public Admin() {
     }
 
-    public Admin(String name, String email, String password) {
+    public Admin(String name, String email, String password, String role) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
     public Long getAdminId() {
@@ -67,5 +72,13 @@ public class Admin {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
